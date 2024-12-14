@@ -1,35 +1,81 @@
 const CLIENT_ID = 'YOUR_LICHESS_CLIENT_ID'; // ここにLichessのクライアントIDを入力
-const REDIRECT_URI = 'YOUR_REDIRECT_URI'; // ここにリダイレクトURIを入力
+const REDIRECT_URI = 'https://<username>.github.io/<repository-name>/'; // ここにリダイレクトURIを入力
 
-// Lichessでログインする関数
-document.getElementById('login-button').addEventListener('click', function() {
-    const authUrl = `https://lichess.org/oauth/authorize?response_type=token&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+async function generateCodeChallenge() {
+    const codeVerifier = generateRandomString(128);
+    const hashed = await sha256(codeVerifier);
+    const codeChallenge = base64urlEncode(hashed);
+    
+    sessionStorage.setItem('code_verifier', codeVerifier);
+    sessionStorage.setItem('state', generateRandomString(16)); // Stateも生成
+    
+    return codeChallenge;
+}
+
+function generateRandomString(length) {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return result;
+}
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return new Uint8Array(hashBuffer);
+}
+
+function base64urlEncode(buffer) {
+    const binary = String.fromCharCode(...buffer);
+    const base64 = btoa(binary);
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+document.getElementById('login-button').addEventListener('click', async function() {
+    const codeChallenge = await generateCodeChallenge();
+    const state = sessionStorage.getItem('state');
+    
+    const authUrl = `https://lichess.org/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge_method=S256&code_challenge=${codeChallenge}&state=${state}`;
+    
     window.location.href = authUrl;
 });
 
-// URLからアクセストークンを取得する関数
 function getAccessToken() {
     const hash = window.location.hash;
-    const tokenMatch = hash.match(/access_token=([^&]*)/);
+    const tokenMatch = hash.match(/code=([^&]*)/);
     return tokenMatch ? tokenMatch[1] : null;
 }
 
-// ユーザーデータを取得して表示する関数
-async function fetchUserData(token) {
-    try {
-        const response = await fetch('https://lichess.org/api/account', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('ユーザーが見つかりません。');
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error(error);
-        alert(error.message);
-    }
+async function fetchAccessToken(code) {
+    const codeVerifier = sessionStorage.getItem('code_verifier');
+    const response = await fetch('https://lichess.org/api/token', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: code,
+            code_verifier: codeVerifier,
+            redirect_uri: REDIRECT_URI,
+            client_id: CLIENT_ID
+        })
+    });
+    
+    const data = await response.json();
+    return data.access_token;
 }
 
-// ユーザーデータを表示する関数
+async function fetchUserData(token) {
+    const response = await fetch('https://lichess.org/api/account', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    return data;
+}
+
 async function displayUserData(token) {
     const userData = await fetchUserData(token);
 
@@ -52,15 +98,15 @@ async function displayUserData(token) {
     }
 }
 
-// ページ読み込み時にトークンを取得してユーザーデータを表示
 window.onload = function() {
-    const token = getAccessToken();
-    if (token) {
-        displayUserData(token);
+    const code = getAccessToken();
+    if (code) {
+        fetchAccessToken(code).then(token => {
+            displayUserData(token);
+        });
     }
 };
 
-// 寄付ボタンの機能
 document.getElementById('donate-button').addEventListener('click', function() {
     window.open('https://www.paypal.com/donate?hosted_button_id=寄付ボタンIDをここに', '_blank');
 });
