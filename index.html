@@ -7,24 +7,30 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>ユーザーポートフォリオ</h1>
-    </header>
-    <main id="portfolio">
-        <div class="user-info">
-            <img id="profile-pic" src="" alt="プロフィール画像">
-            <h2 id="username"></h2>
-            <p id="bio"></p>
+    <div class="twitter__container">
+        <div class="twitter__title">
+            <h1>Lichess ポートフォリオ</h1>
         </div>
-        <div class="stats">
-            <h3>成績</h3>
-            <ul id="game-stats"></ul>
+
+        <div class="twitter__contents scroll">
+            <div class="twitter__block">
+                <figure>
+                    <img id="profile-pic" src="default-image-url.jpg" alt="プロフィール画像" />
+                </figure>
+                <div class="twitter__block-text">
+                    <div class="name" id="username"></div>
+                    <div class="date" id="bio"></div>
+                    <div class="text">
+                        <div id="game-stats"></div>
+                    </div>
+                    <div class="twitter__icon">
+                        <button id="link-button">Lichessと連携</button>
+                        <button id="donate-button">寄付する</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="donation">
-            <h3>寄付を募る</h3>
-            <button id="donate-button">寄付する</button>
-        </div>
-    </main>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
