@@ -1,5 +1,5 @@
-const CLIENT_ID = 'YOUR_LICHESS_CLIENT_ID'; // LichessのクライアントIDをここに
-const REDIRECT_URI = 'YOUR_REDIRECT_URI'; // リダイレクトURIをここに
+const CLIENT_ID = 'YOUR_LICHESS_CLIENT_ID'; // ここにLichessのクライアントIDを入力
+const REDIRECT_URI = 'YOUR_REDIRECT_URI'; // ここにリダイレクトURIを入力
 
 // Lichessでログインする関数
 document.getElementById('login-button').addEventListener('click', function() {
