@@ -1,5 +1,5 @@
-const CLIENT_ID = 'YOUR_LICHESS_CLIENT_ID'; // ここにLichessのクライアントIDを入力
-const REDIRECT_URI = 'https://<username>.github.io/<repository-name>/'; // ここにリダイレクトURIを入力
+const CLIENT_ID = 'lip_90ovreZ04dkicgFOSguY'; // ここにLichessのクライアントIDを入力
+const REDIRECT_URI = 'https://ysasaki1.github.io/li2/'; // ここにリダイレクトURIを入力
 
 async function generateCodeChallenge() {
     const codeVerifier = generateRandomString(128);
@@ -58,14 +58,14 @@ async function fetchAccessToken(code) {
         body: new URLSearchParams({
             grant_type: 'authorization_code',
             code: code,
-            code_verifier: codeVerifier,
             redirect_uri: REDIRECT_URI,
-            client_id: CLIENT_ID
+            client_id: CLIENT_ID,
+            code_verifier: codeVerifier // code_verifierを送信
         })
     });
     
     const data = await response.json();
-    return data.access_token;
+    return data.access_token; // アクセストークンを返す
 }
 
 async function fetchUserData(token) {
