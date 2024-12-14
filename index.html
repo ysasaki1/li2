@@ -12,20 +12,24 @@
             <h1>Lichess ポートフォリオ</h1>
         </div>
 
-        <div class="twitter__contents scroll">
-            <div class="twitter__block">
-                <figure>
-                    <img id="profile-pic" src="default-image-url.jpg" alt="プロフィール画像" />
-                </figure>
-                <div class="twitter__block-text">
-                    <div class="name" id="username"></div>
-                    <div class="date" id="bio"></div>
-                    <div class="text">
-                        <div id="game-stats"></div>
-                    </div>
-                    <div class="twitter__icon">
-                        <button id="link-button">Lichessと連携</button>
-                        <button id="donate-button">寄付する</button>
+        <div class="twitter__contents scroll" id="user-container">
+            <div id="login-container">
+                <button id="login-button">Lichessでログイン</button>
+            </div>
+            <div id="user-info" style="display: none;">
+                <div class="twitter__block">
+                    <figure>
+                        <img id="profile-pic" src="default-image-url.jpg" alt="プロフィール画像" />
+                    </figure>
+                    <div class="twitter__block-text">
+                        <div class="name" id="username"></div>
+                        <div class="date" id="bio"></div>
+                        <div class="text">
+                            <div id="game-stats"></div>
+                        </div>
+                        <div class="twitter__icon">
+                            <button id="donate-button">寄付する</button>
+                        </div>
                     </div>
                 </div>
             </div>
