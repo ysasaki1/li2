@@ -1,5 +1,5 @@
-const CLIENT_ID = 'lip_90ovreZ04dkicgFOSguY'; // ここにLichessのクライアントIDを入力
-const REDIRECT_URI = 'https://ysasaki1.github.io/li2/'; // ここにリダイレクトURIを入力
+const CLIENT_ID = 'lip_90ovreZ04dkicgFOSguY'; // 発行されたクライアントIDを入力
+const REDIRECT_URI = 'https://ysasaki1.github.io/li2/'; // 正確なリダイレクトURIを入力
 
 async function generateCodeChallenge() {
     const codeVerifier = generateRandomString(128);
@@ -7,47 +7,19 @@ async function generateCodeChallenge() {
     const codeChallenge = base64urlEncode(hashed);
     
     sessionStorage.setItem('code_verifier', codeVerifier);
-    sessionStorage.setItem('state', generateRandomString(16)); // Stateも生成
-    
     return codeChallenge;
-}
-
-function generateRandomString(length) {
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    return result;
-}
-
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    return new Uint8Array(hashBuffer);
-}
-
-function base64urlEncode(buffer) {
-    const binary = String.fromCharCode(...buffer);
-    const base64 = btoa(binary);
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 document.getElementById('login-button').addEventListener('click', async function() {
     const codeChallenge = await generateCodeChallenge();
-    const state = sessionStorage.getItem('state');
-    
+    const state = generateRandomString(16); // 状態を生成
+
     const authUrl = `https://lichess.org/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge_method=S256&code_challenge=${codeChallenge}&state=${state}`;
     
-    window.location.href = authUrl;
+    window.location.href = authUrl; // 認証リクエストを送信
 });
 
-function getAccessToken() {
-    const hash = window.location.hash;
-    const tokenMatch = hash.match(/code=([^&]*)/);
-    return tokenMatch ? tokenMatch[1] : null;
-}
-
+// アクセストークンを取得するための関数
 async function fetchAccessToken(code) {
     const codeVerifier = sessionStorage.getItem('code_verifier');
     const response = await fetch('https://lichess.org/api/token', {
@@ -60,7 +32,7 @@ async function fetchAccessToken(code) {
             code: code,
             redirect_uri: REDIRECT_URI,
             client_id: CLIENT_ID,
-            code_verifier: codeVerifier // code_verifierを送信
+            code_verifier: codeVerifier
         })
     });
     
@@ -68,6 +40,7 @@ async function fetchAccessToken(code) {
     return data.access_token; // アクセストークンを返す
 }
 
+// ユーザー情報を取得するための関数
 async function fetchUserData(token) {
     const response = await fetch('https://lichess.org/api/account', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -76,37 +49,42 @@ async function fetchUserData(token) {
     return data;
 }
 
-async function displayUserData(token) {
-    const userData = await fetchUserData(token);
+// リダイレクト後の処理
+window.onload = async function() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
 
-    if (userData) {
-        document.getElementById('profile-pic').src = userData.profile?.image || 'default-image-url.jpg';
-        document.getElementById('username').innerText = userData.id;
-        document.getElementById('bio').innerText = userData.profile?.bio || '自己紹介がありません';
-
-        const gameStats = document.getElementById('game-stats');
-        gameStats.innerHTML = `
-            <ul>
-                <li>レーティング: ${userData.perfs.blitz.rating || 'N/A'}</li>
-                <li>ゲーム数: ${userData.nbGames || 'N/A'}</li>
-                <li>勝利数: ${userData.perfs.blitz.wins || 'N/A'}</li>
-            </ul>
-        `;
-        
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('user-info').style.display = 'block';
-    }
-}
-
-window.onload = function() {
-    const code = getAccessToken();
     if (code) {
-        fetchAccessToken(code).then(token => {
-            displayUserData(token);
-        });
+        const token = await fetchAccessToken(code);
+        const userData = await fetchUserData(token);
+
+        // ユーザー情報を表示
+        document.getElementById('username').innerText = userData.id;
+        document.getElementById('profile-pic').src = userData.profile?.image || 'default-image-url.jpg';
+        document.getElementById('user-info').style.display = 'block';
     }
 };
 
-document.getElementById('donate-button').addEventListener('click', function() {
-    window.open('https://www.paypal.com/donate?hosted_button_id=寄付ボタンIDをここに', '_blank');
-});
+// ランダムな文字列を生成する関数
+function generateRandomString(length) {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return result;
+}
+
+// SHA256ハッシュを生成する関数
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return new Uint8Array(hashBuffer);
+}
+
+// BASE64URLエンコードを行う関数
+function base64urlEncode(buffer) {
+    const binary = String.fromCharCode(...buffer);
+    const base64 = btoa(binary);
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
