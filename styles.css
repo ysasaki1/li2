@@ -5,26 +5,70 @@ body {
     background-color: #f4f4f4;
 }
 
-header {
+.twitter__container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.twitter__title {
     text-align: center;
     margin-bottom: 20px;
 }
 
-.user-info {
-    text-align: center;
+.twitter__contents {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.twitter__block {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+figure {
+    margin: 0;
+    margin-right: 10px;
 }
 
 #profile-pic {
     border-radius: 50%;
-    width: 150px;
-    height: 150px;
+    width: 50px;
+    height: 50px;
 }
 
-.stats {
-    margin-top: 20px;
+.twitter__block-text {
+    flex: 1;
 }
 
-.donation {
-    margin-top: 30px;
-    text-align: center;
+.name {
+    font-weight: bold;
+}
+
+.date {
+    color: gray;
+    font-size: 12px;
+}
+
+.text {
+    margin-top: 10px;
+}
+
+.twitter__icon {
+    margin-top: 10px;
+}
+
+button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1DA1F2;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0d8ecf;
 }
