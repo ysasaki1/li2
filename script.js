@@ -12,8 +12,7 @@ async function fetchUserData(username) {
 }
 
 // ユーザーデータを表示する関数
-async function displayUserData() {
-    const username = 'ユーザー名をここに'; // ここを実際のユーザー名に変更
+async function displayUserData(username) {
     const userData = await fetchUserData(username);
 
     if (userData) {
@@ -23,17 +22,24 @@ async function displayUserData() {
 
         const gameStats = document.getElementById('game-stats');
         gameStats.innerHTML = `
-            <li>レーティング: ${userData.perfs.blitz.rating || 'N/A'}</li>
-            <li>ゲーム数: ${userData.nbGames || 'N/A'}</li>
-            <li>勝利数: ${userData.perfs.blitz.wins || 'N/A'}</li>
+            <ul>
+                <li>レーティング: ${userData.perfs.blitz.rating || 'N/A'}</li>
+                <li>ゲーム数: ${userData.nbGames || 'N/A'}</li>
+                <li>勝利数: ${userData.perfs.blitz.wins || 'N/A'}</li>
+            </ul>
         `;
     }
 }
+
+// Lichessと連携するボタンの機能
+document.getElementById('link-button').addEventListener('click', function() {
+    const username = prompt('Lichessのユーザー名を入力してください:');
+    if (username) {
+        displayUserData(username);
+    }
+});
 
 // 寄付ボタンの機能
 document.getElementById('donate-button').addEventListener('click', function() {
     window.open('https://www.paypal.com/donate?hosted_button_id=寄付ボタンIDをここに', '_blank');
 });
-
-// データ表示を実行
-displayUserData();
